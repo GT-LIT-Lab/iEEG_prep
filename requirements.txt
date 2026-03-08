@@ -1,0 +1,7 @@
+# Core (used by utils and notebooks)
+mne
+numpy
+scipy
+
+# Shape annotations for preprocessing.interictal (optional for runtime, needed for type checking)
+jaxtyping
