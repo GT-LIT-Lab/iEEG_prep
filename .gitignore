@@ -32,3 +32,9 @@ slurm-*.out
 # OS
 .DS_Store
 Thumbs.db
+
+# Batch Scripts Directory
+batch_script/*
+
+# Job Reports Directory - logger for batch scripts
+jobreports/*
