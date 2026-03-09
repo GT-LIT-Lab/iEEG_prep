@@ -1,0 +1,1180 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LIT Lab iEEG preprocessing pipeline">
+      
+      
+      
+      
+        <link rel="prev" href="../preprocessing/">
+      
+      
+        <link rel="next" href="../api/utils/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>IED Pipeline - iEEG Prep</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#interictal-ied-pipeline-user-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="iEEG Prep" class="md-header__button md-logo" aria-label="iEEG Prep" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            iEEG Prep
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              IED Pipeline
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="iEEG Prep" class="md-nav__button md-logo" aria-label="iEEG Prep" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    iEEG Prep
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../preprocessing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Preprocessing Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IED Pipeline
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IED Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-command-line-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Command-line only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-hpc-slurm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: HPC (SLURM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config file format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Config file format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-parameters-interictal_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline parameters (interictal_config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ied_resultsnpz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ied_results.npz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ied_metadatajson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ied_metadata.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-with-return-intermediates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional (with --return-intermediates)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pipeline-steps-what-the-code-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline steps (what the code does)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-results-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using results in Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command-line reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/ied/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IED
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-command-line-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Command-line only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-hpc-slurm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: HPC (SLURM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config file format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Config file format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-parameters-interictal_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline parameters (interictal_config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ied_resultsnpz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ied_results.npz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ied_metadatajson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ied_metadata.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-with-return-intermediates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional (with --return-intermediates)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pipeline-steps-what-the-code-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline steps (what the code does)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-results-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using results in Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command-line reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="interictal-ied-pipeline-user-guide">Interictal (IED) pipeline – user guide</h1>
+<p>This document describes the <strong>interictal epileptiform discharge (IED) detection pipeline</strong>: how to run it, what it does, and what it outputs. The method is based on Janca et al. (2015).</p>
+<p><strong>Reference:</strong> Janca, R., et al. (2015). Detection of interictal epileptiform discharges using signal envelope distribution modelling. <em>Brain Topography</em>, 28(6), 770–778. https://link.springer.com/article/10.1007/s10548-014-0379-1</p>
+<hr />
+<h2 id="quick-start">Quick start</h2>
+<p><strong>Requirements:</strong> EDF file with channel names that start with <code>L</code> or <code>R</code> (plus optional digits) for sEEG channels. Other channels (EKG, DC, etc.) are kept but not used for IED detection.</p>
+<h3 id="option-1-config-file">Option 1: Config file</h3>
+<ol>
+<li>
+<p>Copy the example config and edit paths and options:
+   <code>bash
+   cp batch_script/ied_config_example.json my_config.json
+   # Edit my_config.json: set raw_path and output_dir</code></p>
+</li>
+<li>
+<p>Run the pipeline:
+   <code>bash
+   python -m preprocessing.IED_analysis --config my_config.json</code></p>
+</li>
+</ol>
+<h3 id="option-2-command-line-only">Option 2: Command-line only</h3>
+<pre><code class="language-bash">python -m preprocessing.IED_analysis \
+  --raw-path /path/to/your/file.edf \
+  --output-dir /path/to/output
+</code></pre>
+<h3 id="option-3-hpc-slurm">Option 3: HPC (SLURM)</h3>
+<pre><code class="language-bash">sbatch batch_script/run_ied_analysis.sbatch --config my_config.json
+# or
+sbatch batch_script/run_ied_analysis.sbatch --raw-path file.edf --output-dir ./out
+</code></pre>
+<hr />
+<h2 id="config-file-format">Config file format</h2>
+<p><code>config.json</code> can contain:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>raw_path</code></td>
+<td><strong>Yes</strong> (if no <code>--raw-path</code>)</td>
+<td>Path to the raw EDF file</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td>No (default: current directory)</td>
+<td>Directory where results are saved</td>
+</tr>
+<tr>
+<td><code>channels_above_rate_thresh</code></td>
+<td>No (default: 6.5)</td>
+<td>Spike rate threshold (spikes/min) for the <code>channels_above_rate</code> boolean</td>
+</tr>
+<tr>
+<td><code>interictal_config</code></td>
+<td>No</td>
+<td>Object with pipeline parameters (see below)</td>
+</tr>
+</tbody>
+</table>
+<p>Any option can be overridden from the command line. Example config:</p>
+<pre><code class="language-json">{
+  &quot;raw_path&quot;: &quot;/path/to/file.edf&quot;,
+  &quot;output_dir&quot;: &quot;/path/to/output&quot;,
+  &quot;channels_above_rate_thresh&quot;: 6.5,
+  &quot;interictal_config&quot;: {
+    &quot;sfreq_target&quot;: 200,
+    &quot;bandpass_low&quot;: 10,
+    &quot;bandpass_high&quot;: 60,
+    &quot;notch_method&quot;: &quot;custom_biquad&quot;,
+    &quot;notch_freq&quot;: 60,
+    &quot;win_coeff&quot;: 5,
+    &quot;overlap_coeff&quot;: 4,
+    &quot;threshold_k&quot;: 3.65,
+    &quot;polyspike_union_sec&quot;: 0.12,
+    &quot;trim_edges_sec&quot;: 1
+  }
+}
+</code></pre>
+<h3 id="pipeline-parameters-interictal_config">Pipeline parameters (<code>interictal_config</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sfreq_target</code></td>
+<td>200</td>
+<td>Resampling target (Hz)</td>
+</tr>
+<tr>
+<td><code>bandpass_low</code></td>
+<td>10</td>
+<td>Bandpass low cutoff (Hz)</td>
+</tr>
+<tr>
+<td><code>bandpass_high</code></td>
+<td>60</td>
+<td>Bandpass high cutoff (Hz)</td>
+</tr>
+<tr>
+<td><code>bandpass_order</code></td>
+<td>8</td>
+<td>IIR filter order</td>
+</tr>
+<tr>
+<td><code>bandpass_ftype</code></td>
+<td><code>"cheby2"</code></td>
+<td>IIR type (<code>"cheby2"</code>, etc.)</td>
+</tr>
+<tr>
+<td><code>bandpass_rs</code></td>
+<td>60</td>
+<td>Cheby2 stopband ripple (dB)</td>
+</tr>
+<tr>
+<td><code>notch_freq</code></td>
+<td>60</td>
+<td>Line-noise notch frequency (Hz)</td>
+</tr>
+<tr>
+<td><code>notch_radius</code></td>
+<td>0.985</td>
+<td>Pole radius for custom biquad notch</td>
+</tr>
+<tr>
+<td><code>notch_method</code></td>
+<td><code>"custom_biquad"</code></td>
+<td><code>"custom_biquad"</code> or <code>"mne"</code></td>
+</tr>
+<tr>
+<td><code>win_coeff</code></td>
+<td>5</td>
+<td>Envelope segment window (seconds)</td>
+</tr>
+<tr>
+<td><code>overlap_coeff</code></td>
+<td>4</td>
+<td>Envelope segment overlap (seconds)</td>
+</tr>
+<tr>
+<td><code>smooth_window_len</code></td>
+<td>5</td>
+<td>Moving-average length for μ/σ smoothing</td>
+</tr>
+<tr>
+<td><code>threshold_k</code></td>
+<td>3.65</td>
+<td>Threshold multiplier: k × (mode + median)</td>
+</tr>
+<tr>
+<td><code>polyspike_union_sec</code></td>
+<td>0.12</td>
+<td>Merge spikes within this window (seconds)</td>
+</tr>
+<tr>
+<td><code>trim_edges_sec</code></td>
+<td>1</td>
+<td>Drop first/last N seconds</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="outputs">Outputs</h2>
+<p>All files are written under <code>output_dir</code>.</p>
+<h3 id="ied_resultsnpz"><code>ied_results.npz</code></h3>
+<p>NumPy archive (load with <code>np.load(...)</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Shape / type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spike_markers</code></td>
+<td><code>(n_channels, n_samples)</code> bool</td>
+<td>1 where a spike was detected</td>
+</tr>
+<tr>
+<td><code>channel_spike_counts</code></td>
+<td><code>(n_channels,)</code> int</td>
+<td>Total spikes per channel</td>
+</tr>
+<tr>
+<td><code>channel_spike_rates</code></td>
+<td><code>(n_channels,)</code> float</td>
+<td>Spikes per minute per channel</td>
+</tr>
+<tr>
+<td><code>channels_above_rate</code></td>
+<td><code>(n_channels,)</code> bool</td>
+<td>Channels with rate &gt; <code>channels_above_rate_thresh</code></td>
+</tr>
+<tr>
+<td><code>ch_names</code></td>
+<td>1D array of str</td>
+<td>sEEG channel names (same order as above)</td>
+</tr>
+<tr>
+<td><code>sfreq</code></td>
+<td>scalar</td>
+<td>Sampling frequency (Hz) after resampling</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ied_metadatajson"><code>ied_metadata.json</code></h3>
+<p>Summary and run config:</p>
+<ul>
+<li><code>sfreq</code>, <code>time_min</code>, <code>n_spikes_total</code>, <code>n_channels</code>, <code>n_samples</code></li>
+<li><code>ch_names</code>, <code>channels_above_rate_thresh</code>, <code>n_channels_above_rate</code></li>
+<li><code>config</code>: full <code>interictal_config</code> used for the run</li>
+</ul>
+<h3 id="optional-with-return-intermediates">Optional (with <code>--return-intermediates</code>)</h3>
+<ul>
+<li><code>threshold.npy</code> – sample-wise threshold curve <code>(n_channels, n_samples)</code></li>
+<li><code>mu_interp.npy</code>, <code>sigma_interp.npy</code> – interpolated lognormal parameters</li>
+</ul>
+<hr />
+<h2 id="pipeline-steps-what-the-code-does">Pipeline steps (what the code does)</h2>
+<ol>
+<li><strong>Load EDF</strong> and set sEEG channel types (L/R channels → <code>seeg</code> via <code>utils.label_channels</code>).</li>
+<li><strong>Resample</strong> to <code>sfreq_target</code> (default 200 Hz).</li>
+<li><strong>Bandpass</strong> 10–60 Hz (Cheby2 IIR, order 8) on sEEG only.</li>
+<li><strong>Notch</strong> 60 Hz line noise (custom biquad or MNE IIR).</li>
+<li><strong>Hilbert envelope</strong> of the filtered sEEG.</li>
+<li><strong>Lognormal fit</strong> per sliding segment (window <code>win_coeff</code> s, overlap <code>overlap_coeff</code> s) → μ, σ per segment.</li>
+<li><strong>Smooth</strong> μ and σ along segments (moving average).</li>
+<li><strong>Interpolate</strong> μ and σ to every sample (cubic spline).</li>
+<li><strong>Threshold</strong> = k × (lognormal mode + lognormal median).</li>
+<li><strong>Detection</strong>: envelope &gt; threshold → crossings → one peak per crossing → merge nearby spikes (polyspike union) → one local max per merged event → trim first/last N seconds.</li>
+<li><strong>Rates</strong>: spike count and rate per channel; boolean <code>channels_above_rate</code> using the chosen rate threshold.</li>
+</ol>
+<hr />
+<h2 id="using-results-in-python">Using results in Python</h2>
+<pre><code class="language-python">import numpy as np
+import json
+
+# Load arrays
+data = np.load(&quot;output_dir/ied_results.npz&quot;)
+spike_markers = data[&quot;spike_markers&quot;]           # (n_channels, n_samples) bool
+channel_spike_rates = data[&quot;channel_spike_rates&quot;]
+channels_above_rate = data[&quot;channels_above_rate&quot;]
+ch_names = data[&quot;ch_names&quot;]
+
+# Channels with high spike rate
+high_rate_channels = ch_names[channels_above_rate]
+
+# Load metadata
+with open(&quot;output_dir/ied_metadata.json&quot;) as f:
+    meta = json.load(f)
+print(meta[&quot;n_spikes_total&quot;], meta[&quot;time_min&quot;], meta[&quot;channels_above_rate_thresh&quot;])
+</code></pre>
+<hr />
+<h2 id="command-line-reference">Command-line reference</h2>
+<pre><code class="language-text">python -m preprocessing.IED_analysis [OPTIONS]
+</code></pre>
+<p><strong>Required (if not in config):</strong> <code>--raw-path</code> path to EDF.</p>
+<p><strong>Common options:</strong></p>
+<ul>
+<li><code>--config PATH</code> – load options from JSON (must contain <code>raw_path</code> or use <code>--raw-path</code>)</li>
+<li><code>--raw-path PATH</code> – path to raw EDF</li>
+<li><code>--output-dir PATH</code> – where to write results (default: current directory)</li>
+<li><code>--channels-above-rate-thresh FLOAT</code> – rate threshold for boolean mask (default: 6.5)</li>
+<li><code>--return-intermediates</code> – also save threshold, mu_interp, sigma_interp</li>
+<li><code>--notch-method {custom_biquad,mne}</code> – notch filter method</li>
+<li><code>--sfreq-target</code>, <code>--bandpass-low</code>, <code>--bandpass-high</code>, etc. – override config</li>
+</ul>
+<p>Run with <code>--help</code> for the full list.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
