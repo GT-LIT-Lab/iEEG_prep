@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iEEG-prep"
+version = "0.1.0"
+description = "Interictal Epileptiform Discharge Analysis Pipeline"
+requires-python = ">=3.8"
+dependencies = [
+    "mne",
+    "numpy",
+    "scipy",
+    "jaxtyping",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ipykernel",
+]
+
+[tool.setuptools.packages.find]
+include = ["IED*"]
