@@ -6,10 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "iEEG-prep"
 version = "0.1.0"
 description = "Interictal Epileptiform Discharge Analysis Pipeline"
+Author: "Eyas Ayesh"
+Author-email: "eayesh3@gatech.edu"
 requires-python = ">=3.8"
 dependencies = [
     "mne",
     "numpy",
+    "pandas",
     "scipy",
     "jaxtyping",
 ]
@@ -21,4 +24,5 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["IED*"]
+where = [".."]
+include = ["iEEG_prep*"]
