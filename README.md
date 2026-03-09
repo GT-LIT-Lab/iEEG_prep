@@ -1,4 +1,4 @@
-# LIT LAB iEEG preprocessing pipeline
+# LIT LAB iEEG preprocessing pipeline (WIP)
 
 Preprocessing methodology in this repo is based on Regev and Casto et al. (2024).
 
