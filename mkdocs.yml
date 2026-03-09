@@ -1,0 +1,32 @@
+site_name: iEEG Prep
+site_description: LIT Lab iEEG preprocessing pipeline
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: deep-orange
+    accent: amber
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Preprocessing Guide: preprocessing.md
+  - IED Pipeline: INTERICTAL_PIPELINE_STEPS.md
+  - API Reference:
+    - Utils: api/utils.md
+    - IED: api/ied.md
