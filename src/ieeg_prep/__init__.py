@@ -20,6 +20,9 @@ from .task_analysis import (
     compute_response_vector,
     permutation_test,
     build_trial_tensor,
+    MULTISEM_EVENT_CODES,
+    MULTISEM_CONDITION_KEYS,
+    get_multisem_trials_from_block,
 )
 
 __all__ = [
@@ -52,4 +55,8 @@ __all__ = [
     "compute_response_vector",
     "permutation_test",
     "build_trial_tensor",
+    # multisem
+    "MULTISEM_EVENT_CODES",
+    "MULTISEM_CONDITION_KEYS",
+    "get_multisem_trials_from_block",
 ]

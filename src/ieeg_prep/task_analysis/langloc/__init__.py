@@ -10,6 +10,7 @@ from .analysis import (
     build_trial_tensor,
 )
 from .pipeline import run_langloc_pipeline
+from .stat import amplitude_permutation_test
 
 __all__ = [
     "DEFAULT_EVENT_CODES",
@@ -20,4 +21,5 @@ __all__ = [
     "compute_word_starts",
     "build_trial_tensor",
     "run_langloc_pipeline",
+    "amplitude_permutation_test",
 ]

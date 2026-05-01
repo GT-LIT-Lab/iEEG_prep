@@ -1,0 +1,14 @@
+{
+  "envelope_path":        "/path/to/preprocessed/preprocessed_envelope_ieeg.fif",
+  "events_path":          "/path/to/preprocessed/preprocessed_events.npy",
+  "blocks_info_path":     "/path/to/preprocessed/blocks_info.json",
+  "langloc_results_path": "/path/to/task_analysis/langloc_results.npz",
+  "langloc_blocks":       ["langloc1", "langloc2"],
+  "frequency":            60,
+  "output_dir":           "/path/to/figures/SUBJECT/langloc_plots_zscore",
+  "plot_points":          true,
+  "run_permutation_test": false,
+  "plot_all_variants":    false,
+  "n_permutations":       5000,
+  "perm_seed":            42
+}

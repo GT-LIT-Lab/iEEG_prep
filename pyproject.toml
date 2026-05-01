@@ -27,6 +27,7 @@ csv2brainplot = "ieeg_prep.viz.csv2brainplot:main"
 run-prep = "ieeg_prep.prep.run_prep:main"
 run-blocks = "ieeg_prep.task_analysis.extract_blocks:main"
 run-langloc = "ieeg_prep.task_analysis.langloc.run:main"
+run-langloc-plots = "ieeg_prep.task_analysis.langloc.plot_langloc:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

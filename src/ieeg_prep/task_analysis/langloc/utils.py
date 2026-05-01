@@ -282,7 +282,7 @@ def load_lang_mask(
 
     The mask is aligned to the envelope channel order used during the pipeline
     run, so it can be passed directly to
-    :func:`~ieeg_prep.viz.langloc_plots.plot_sent_nw` or used to index into
+    :func:`~ieeg_prep.viz.langloc_plots.plot_sent_nw_timeseries` or used to index into
     the trial tensor produced by
     :func:`~ieeg_prep.task_analysis.langloc.analysis.build_trial_tensor`.
 
