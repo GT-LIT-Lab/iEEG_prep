@@ -5,9 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "iEEG-prep"
 version = "0.1.0"
-description = "Interictal Epileptiform Discharge Analysis Pipeline"
-Author: "Eyas Ayesh"
-Author-email: "eayesh3@gatech.edu"
+description = "iEEG preprocessing, IED analysis, and language localizer pipeline"
+authors = [{name = "Eyas Ayesh", email = "eayesh3@gatech.edu"}]
 requires-python = ">=3.8"
 dependencies = [
     "mne",
@@ -23,6 +22,12 @@ dev = [
     "ipykernel",
 ]
 
+[project.scripts]
+csv2brainplot = "ieeg_prep.viz.csv2brainplot:main"
+run-prep = "ieeg_prep.prep.run_prep:main"
+run-blocks = "ieeg_prep.task_analysis.extract_blocks:main"
+run-langloc = "ieeg_prep.task_analysis.langloc.run:main"
+
 [tool.setuptools.packages.find]
-where = [".."]
-include = ["iEEG_prep*"]
+where = ["src"]
+include = ["ieeg_prep*"]
