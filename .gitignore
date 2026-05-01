@@ -44,3 +44,12 @@ batch_script/*
 
 # Job Reports Directory - logger for batch scripts
 jobreports/*
+
+# Generated figures
+figures/
+
+# Patient-specific configs (keep example_configs/ tracked)
+configs/EMOP*/
+
+# Claude Code instructions (local only)
+CLAUDE.md
