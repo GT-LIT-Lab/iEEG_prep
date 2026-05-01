@@ -142,7 +142,7 @@ def add_coordinates(
     return raw
 
 def rename_channels(raw: mne.io.Raw, channel_names: list[{"name": str, "new_name": str}]) -> mne.io.Raw:
-    """Rename channels in a Raw object. Sometimes the channel names are labeled incorrectly and need to be manually corrected. Example: RPul in EMOP0004 is incorrectly labeled as RPuI
+    """Rename channels in a Raw object. Sometimes the channel names are labeled incorrectly and need to be manually corrected. Example: RPul (lower case "L") in EMOP0004 is incorrectly labeled as RPuI (upper case "i")
 
     Args:
         raw: MNE Raw object.

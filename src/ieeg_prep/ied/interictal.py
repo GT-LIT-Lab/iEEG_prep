@@ -2,10 +2,6 @@
 Interictal pipeline: filter → envelope → lognormal threshold → spike detection. Adapted from Janca et al. (2015) [https://link.springer.com/article/10.1007/s10548-014-0379-1]
 
 Processes MNE Raw (sEEG) to produce a binary spike marker and per-channel rates.
-Modular steps; no file I/O (caller loads/saves).
-
-Array shapes are annotated with jaxtyping (Float/Bool/Int[Array, "dim1 dim2"]) for
-documentation and optional static checking.
 """
 
 from __future__ import annotations

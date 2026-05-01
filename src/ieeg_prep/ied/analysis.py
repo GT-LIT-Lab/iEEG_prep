@@ -18,8 +18,8 @@ Example config.json:
     }
 
 Example usage:
-    python -m preprocessing.IED_analysis --config config.json
-    python -m preprocessing.IED_analysis --raw-path file.edf --output-dir ./out
+    python -m ieeg_prep.ied.analysis --config config.json
+    python -m ieeg_prep.ied.analysis --raw-path file.edf --output-dir ./out
 """
 
 from __future__ import annotations
@@ -33,15 +33,7 @@ import mne
 import numpy as np
 
 from .interictal import InterictalConfig, InterictalResult, run_interictal_pipeline
-
-try:
-    from ..utils import label_channels
-except ImportError:
-    # When run as __main__ (python -m preprocessing.IED_analysis), parent may not be a package
-    _root = Path(__file__).resolve().parent.parent
-    if str(_root) not in __import__("sys").path:
-        __import__("sys").path.insert(0, str(_root))
-    from utils import label_channels
+from ..utils import label_channels
 
 
 def _config_from_dict(d: dict) -> InterictalConfig:
