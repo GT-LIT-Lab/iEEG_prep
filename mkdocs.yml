@@ -4,7 +4,7 @@ site_description: LIT Lab iEEG preprocessing pipeline
 theme:
   name: material
   palette:
-    scheme: default
+    scheme: slate
     primary: deep-orange
     accent: amber
   features:

@@ -1,5 +1,5 @@
 # IED
 
-::: IED.interictal
+::: ieeg_prep.ied.interictal
 
-::: IED.IED_analysis
+::: ieeg_prep.ied.analysis
