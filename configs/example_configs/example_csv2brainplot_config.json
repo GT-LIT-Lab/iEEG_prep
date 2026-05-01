@@ -1,0 +1,38 @@
+{
+  "csv": "/path/to/subject_electrodes.csv",
+  "coord_x_col": "mni_x",
+  "coord_y_col": "mni_y",
+  "coord_z_col": "mni_z",
+  "output_dir": "/path/to/output/figures/",
+  "plots": [
+    {
+      "title": "Language Electrodes",
+      "filename": "lang_brain.png",
+      "masked": true,
+      "data": "lang_mask",
+      "colors": ["red", "blue"],
+      "labels": ["Lang+", "Control"],
+      "s": 20
+    },
+    {
+      "title": "Gamma Power",
+      "filename": "gamma_brain.png",
+      "masked": false,
+      "data": "gamma_power",
+      "cmap": "hot",
+      "colorbar": true,
+      "s": 20
+    },
+    {
+      "title": "Beta Lateralisation",
+      "filename": "beta_lat_brain.png",
+      "masked": false,
+      "data": "beta_lat",
+      "cmap": "coolwarm",
+      "center": 0,
+      "symmetric": true,
+      "colorbar": true,
+      "s": 20
+    }
+  ]
+}

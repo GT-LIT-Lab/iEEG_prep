@@ -1,0 +1,9 @@
+{
+  "events_path": "/path/to/preprocessed_events.npy",
+  "output_path": "/path/to/block_info.json",
+  "labels": ["rest", "language", "motor"],
+  "start_code": 1,
+  "end_code": 2,
+  "ignore_incomplete": true,
+  "confirm_scan_plan_consulted": false
+}

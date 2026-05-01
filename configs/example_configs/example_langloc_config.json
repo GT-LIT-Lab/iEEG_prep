@@ -1,0 +1,17 @@
+{
+  "envelope_path":       "/path/to/preprocessed/preprocessed_envelope.fif",
+  "events_path":         "/path/to/preprocessed/preprocessed_events.npy",
+  "blocks_info_path":    "/path/to/processed/blocks_info.json",
+  "langloc_blocks":      ["langloc1", "langloc2"],
+  "results_path":        "/path/to/processed/langloc_results.npz",
+  "electrodes_csv_path": "/path/to/processed/electrodes.csv",
+  "channel_col":         "channel",
+  "superset":            true,
+  "n_perm":              10000,
+  "seed":                42,
+  "threshold_pct":       95.0,
+  "n_words":             12,
+  "plot":                false,
+  "plot_output_dir":     "/path/to/figures",
+  "mni_coords_cols":     ["mni_x", "mni_y", "mni_z"]
+}
