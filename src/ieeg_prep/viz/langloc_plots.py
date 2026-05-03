@@ -73,15 +73,19 @@ def plot_sent_nw_timeseries(
         return mean, se
 
     def _fill_panel(ax: plt.Axes, arr: np.ndarray, color: str, label: str) -> None:
+        ax.set_title(label)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        if arr.shape[0] == 0:
+            ax.text(0.5, 0.5, "No electrodes", transform=ax.transAxes,
+                    ha="center", va="center", color="gray", fontsize=11)
+            return
         if show_channels:
             for ch_trace in arr:
                 ax.plot(x, ch_trace, color=color, linewidth=0.5, alpha=0.15, zorder=1)
         mean, se = _mean_se(arr)
         ax.fill_between(x, mean - se, mean + se, color=color, alpha=0.2, zorder=2)
         ax.plot(x, mean, color=color, linewidth=2, zorder=3)
-        ax.set_title(label)
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
 
     def _add_word_onsets(axes_flat: list[plt.Axes]) -> None:
         if word_onsets is None:
@@ -205,7 +209,9 @@ def plot_sent_nw_mean_amplitude(
     sent_g2, nw_g2 = sent_vals[group2], nw_vals[group2]
 
     def _mean_se(x: np.ndarray) -> tuple[float, float]:
-        if len(x) <= 1:
+        if len(x) == 0:
+            return np.nan, np.nan
+        if len(x) == 1:
             return float(np.mean(x)), 0.0
         return float(np.mean(x)), float(np.std(x, ddof=1) / np.sqrt(len(x)))
 
@@ -229,6 +235,12 @@ def plot_sent_nw_mean_amplitude(
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.bar(sent_pos, means[:, 0], width=width, color=sent_color, label="Sentence", zorder=1)
     ax.bar(nw_pos,   means[:, 1], width=width, color=nw_color,   label="Non-word", zorder=1)
+    ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
+
+    for idx, grp in enumerate([group1, group2]):
+        if grp.sum() == 0:
+            ax.text(x[idx], 0.5, "No electrodes", transform=ax.get_xaxis_transform(),
+                    ha="center", va="center", color="gray", fontsize=10)
 
     if plot_points:
         rng = np.random.default_rng(0)
@@ -258,6 +270,8 @@ def plot_sent_nw_mean_amplitude(
     if run_permutation_test:
         groups = [(mask, 0), (~mask, 1)]
         for grp_mask, idx in groups:
+            if grp_mask.sum() == 0:
+                continue
             result = amplitude_permutation_test(
                 trial_tensor, grp_mask,
                 n_permutations=n_permutations,
@@ -355,7 +369,9 @@ def plot_sent_nw_diff_amplitude(
     diff_g2 = diff_vals[~mask]
 
     def _mean_se(x: np.ndarray) -> tuple[float, float]:
-        if len(x) <= 1:
+        if len(x) == 0:
+            return np.nan, np.nan
+        if len(x) == 1:
             return float(np.mean(x)), 0.0
         return float(np.mean(x)), float(np.std(x, ddof=1) / np.sqrt(len(x)))
 
@@ -369,6 +385,12 @@ def plot_sent_nw_diff_amplitude(
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.bar(x, bar_means, width=width, color=bar_color, zorder=1)
     ax.axhline(0, color="black", linewidth=0.8, zorder=0)
+    ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
+
+    for idx, grp in enumerate([mask, ~mask]):
+        if grp.sum() == 0:
+            ax.text(x[idx], 0.5, "No electrodes", transform=ax.get_xaxis_transform(),
+                    ha="center", va="center", color="gray", fontsize=10)
 
     if plot_points:
         rng = np.random.default_rng(0)
@@ -389,6 +411,8 @@ def plot_sent_nw_diff_amplitude(
 
     if run_permutation_test:
         for grp_mask, idx in [(mask, 0), (~mask, 1)]:
+            if grp_mask.sum() == 0:
+                continue
             result = amplitude_permutation_test(
                 trial_tensor, grp_mask,
                 n_permutations=n_permutations,

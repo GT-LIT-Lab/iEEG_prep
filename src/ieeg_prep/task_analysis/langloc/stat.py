@@ -39,6 +39,12 @@ def amplitude_permutation_test(
         ``p_value``       – float, one-tailed p-value (fraction of null >= observed).
     """
     mask = np.asarray(mask, dtype=bool)
+    if not mask.any():
+        return {
+            "observed": np.nan,
+            "null": np.full(n_permutations, np.nan),
+            "p_value": np.nan,
+        }
     rng = np.random.default_rng(seed)
 
     n_cond, n_trials, n_channels, n_time = trial_tensor.shape
