@@ -1,10 +1,12 @@
-"""MultiSem task utilities: trial parsing."""
+"""MultiSem task utilities: trial parsing and response vectors."""
 
 from __future__ import annotations
 
 from collections import defaultdict
 
 import numpy as np
+
+from ..localization import compute_response_vector as _core
 
 MULTISEM_EVENT_CODES: dict[str, int] = {
     "experiment_start": 1,
@@ -255,3 +257,91 @@ def get_multisem_trials_from_block(
         t["trial_number"] = n
 
     return valid_trials, bad_trials
+
+
+def load_multisem_mask(
+    results_path,
+    block: str = "superset",
+    exclude_bad: bool = True,
+) -> tuple[np.ndarray, list[str]]:
+    """Load a semantic-responsive mask from a multisem results NPZ file.
+
+    Parameters
+    ----------
+    results_path : str or Path
+        Path to the NPZ file written by :func:`~ieeg_prep.task_analysis.multisem.pipeline.run_multisem_pipeline`.
+    block : str
+        Which result to load.  Use ``"superset"`` (default) for the pooled
+        estimate, or a block label such as ``"multisem1"`` for a per-block mask.
+    exclude_bad : bool
+        If True (default), bad channels are removed from both the mask and
+        ``ch_names``.  If False, the full pipeline channel order is kept.
+
+    Returns
+    -------
+    mask : np.ndarray of bool, shape (n_good_channels,) or (n_channels,)
+        Semantic-responsive mask.
+    ch_names : list of str
+        Channel names in the same order as ``mask``.
+
+    Raises
+    ------
+    KeyError
+        If ``block`` is not found in the results file.
+    """
+    from pathlib import Path
+    data = np.load(Path(results_path), allow_pickle=True)
+
+    key = "superset_is_semantic_responsive" if block == "superset" else f"{block}_is_semantic_responsive"
+    if key not in data:
+        available = [
+            k.replace("_is_semantic_responsive", "")
+            for k in data.files
+            if k.endswith("_is_semantic_responsive")
+        ]
+        raise KeyError(f"Block '{block}' not found. Available: {available}")
+
+    mask = data[key].astype(bool)
+    ch_names = [str(ch) for ch in data["ch_names"]]
+
+    if exclude_bad:
+        bad_set = {str(ch) for ch in data["bad_channels"]}
+        good = np.array([ch not in bad_set for ch in ch_names])
+        mask = mask[good]
+        ch_names = [ch for ch, keep in zip(ch_names, good) if keep]
+
+    return mask, ch_names
+
+
+def compute_response_vector(
+    tensor: np.ndarray,
+    conditions: list[str],
+    pos_condition: str,
+    neg_condition: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute mean response vector and ideal labels from a MultiSem trial tensor.
+
+    Parameters
+    ----------
+    tensor : np.ndarray, shape (n_conditions, n_trials, n_channels, n_time)
+        Output of :func:`build_multisem_trial_tensor`.
+    conditions : list of str
+        Condition names aligned with tensor axis 0.
+    pos_condition : str
+        Name of the positive condition (assigned +1).
+    neg_condition : str
+        Name of the negative condition (assigned -1).
+
+    Returns
+    -------
+    respvec : np.ndarray, shape (n_channels, 2 * n_trials)
+        Mean signal per channel per trial, positive trials first.
+    ideal : np.ndarray, shape (2 * n_trials,)
+        +1 / -1 contrast labels.
+    """
+    pos_idx = conditions.index(pos_condition)
+    neg_idx = conditions.index(neg_condition)
+    n_trials = tensor.shape[1]
+    pos_trials = [tensor[pos_idx, t] for t in range(n_trials)]
+    neg_trials = [tensor[neg_idx, t] for t in range(n_trials)]
+    return _core(pos_trials, neg_trials)

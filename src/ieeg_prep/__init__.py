@@ -1,4 +1,4 @@
-from .utils import add_coordinates, label_channels, rename_channels
+from .utils import add_coordinates, label_channels, rename_channels, load_coords
 from .prep.preprocessing import (
     mark_bad_channels,
     filter_raw,
@@ -23,6 +23,7 @@ from .task_analysis import (
     MULTISEM_EVENT_CODES,
     MULTISEM_CONDITION_KEYS,
     get_multisem_trials_from_block,
+    load_multisem_mask,
 )
 
 __all__ = [
@@ -30,6 +31,7 @@ __all__ = [
     "add_coordinates",
     "label_channels",
     "rename_channels",
+    "load_coords",
     # preprocessing functions
     "mark_bad_channels",
     "filter_raw",
@@ -59,4 +61,5 @@ __all__ = [
     "MULTISEM_EVENT_CODES",
     "MULTISEM_CONDITION_KEYS",
     "get_multisem_trials_from_block",
+    "load_multisem_mask",
 ]

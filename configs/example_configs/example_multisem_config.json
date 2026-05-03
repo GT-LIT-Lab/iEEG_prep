@@ -1,0 +1,17 @@
+{
+  "envelope_path":        "/path/to/preprocessed/preprocessed_envelope.fif",
+  "events_path":          "/path/to/preprocessed/preprocessed_events.npy",
+  "blocks_info_path":     "/path/to/preprocessed/blocks_info.json",
+  "multisem_blocks":      ["multisem1", "multisem2"],
+  "results_path":         "/path/to/task_analysis/multisem_results.npz",
+  "electrodes_csv_path":  "/path/to/preprocessed/electrodes.csv",
+  "channel_col":          "channel",
+  "superset":             true,
+  "n_perm":               10000,
+  "seed":                 42,
+  "threshold_pct":        95.0,
+  "trials_per_condition": 6,
+  "plot":                 false,
+  "plot_output_dir":      "/path/to/figures",
+  "mni_coords_cols":      ["mni_x", "mni_y", "mni_z"]
+}
