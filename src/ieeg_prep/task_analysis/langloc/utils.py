@@ -1,9 +1,10 @@
-"""Language localizer utilities: trial parsing, response vectors, and permutation test."""
+"""Language localizer utilities: trial parsing and response vectors."""
 
 from __future__ import annotations
 
 import numpy as np
-from scipy.stats import rankdata
+
+from ..localization import permutation_test  # noqa: F401  (re-exported for backward compat)
 
 # Default name-to-code mapping for the MIT language localizer paradigm.
 # Verify these against your own paradigm before use.
@@ -166,111 +167,41 @@ def compute_response_vector(
     Returns
     -------
     respvec : np.ndarray, shape (n_channels, n_trials)
-        Mean envelope across all word windows, per channel per trial.
+        Mean envelope across all word-window samples, per channel per trial.
     respvec_ideal : np.ndarray, shape (n_trials,)
-        +1 for sentence trials, -1 for non-word trials, 0 for other.
+        +1 for sentence trials, -1 for non-word trials.
     """
-    n_channels = envelope_data.shape[0]
-    n_trials = len(trials)
-
-    respvec = np.zeros((n_channels, n_trials))
-    respvec_ideal = np.zeros(n_trials)
+    from ..localization import compute_response_vector as _core
 
     sentence_code = event_codes["sentence"]
-    nonword_code = event_codes["non_word"]
+    nonword_code  = event_codes["non_word"]
+
+    pos_trials: list[np.ndarray] = []
+    neg_trials: list[np.ndarray] = []
 
     for t, trial in enumerate(trials):
-        stim_resp = np.zeros(n_channels)
-
-        for start_sample, end_sample in trial["word_bounds"]:
-            if end_sample <= start_sample:
-                print(f"Warning: trial {t} has empty window [{start_sample}, {end_sample}), skipping")
+        windows = []
+        for start, end in trial["word_bounds"]:
+            if end <= start:
+                print(f"Warning: trial {t} has empty window [{start}, {end}), skipping")
                 continue
-            if end_sample > envelope_data.shape[1]:
-                print(f"Warning: trial {t} end_sample {end_sample} exceeds envelope length, skipping")
+            if end > envelope_data.shape[1]:
+                print(f"Warning: trial {t} end_sample {end} exceeds envelope length, skipping")
                 continue
-            stim_resp += envelope_data[:, start_sample:end_sample].mean(axis=1)
-
-        respvec[:, t] = stim_resp / len(trial["word_bounds"])
+            windows.append(envelope_data[:, start:end])
+        if not windows:
+            continue
+        sig = np.concatenate(windows, axis=1)
 
         code = int(trial["word_codes"][0])
         if code == sentence_code:
-            respvec_ideal[t] = 1.0
+            pos_trials.append(sig)
         elif code == nonword_code:
-            respvec_ideal[t] = -1.0
+            neg_trials.append(sig)
 
-    return respvec, respvec_ideal
+    return _core(pos_trials, neg_trials)
 
 
-def permutation_test(
-    respvec: np.ndarray,
-    respvec_ideal: np.ndarray,
-    n_perm: int = 10000,
-    threshold_pct: float = 95.0,
-    seed: int = 42,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """One-sided per-channel Spearman permutation test for language responsiveness.
-
-    For each channel, tests whether the observed Spearman correlation with the
-    ideal contrast vector exceeds the ``threshold_pct`` percentile of a
-    label-shuffled null distribution.
-
-    Parameters
-    ----------
-    respvec : np.ndarray, shape (n_channels, n_trials)
-        Observed responses per channel per trial.
-    respvec_ideal : np.ndarray, shape (n_trials,)
-        Ideal contrast labels (e.g. +1 for sentence, -1 for non-word).
-    n_perm : int
-        Number of label permutations for the null distribution.
-    threshold_pct : float
-        Percentile of the null used as the significance threshold (default 95).
-    seed : int
-        RNG seed for reproducibility.
-
-    Returns
-    -------
-    true_corrs : np.ndarray, shape (n_channels,)
-        Observed Spearman correlation per channel.
-    null_corrs : np.ndarray, shape (n_channels, n_perm)
-        Null distribution correlations.
-    p_values : np.ndarray, shape (n_channels,)
-        One-sided empirical p-values.
-    is_language_responsive : np.ndarray of bool, shape (n_channels,)
-        True where ``true_corrs`` exceeds the null threshold.
-    thresholds : np.ndarray, shape (n_channels,)
-        The ``threshold_pct`` percentile of the null per channel.
-    """
-    rng = np.random.default_rng(seed)
-
-    X = np.asarray(respvec, dtype=float)
-    y = np.asarray(respvec_ideal, dtype=float)
-
-    # Spearman = Pearson on ranks; rank once
-    Xr = np.apply_along_axis(rankdata, 1, X)
-    yr = rankdata(y)
-
-    Xc = Xr - Xr.mean(axis=1, keepdims=True)
-    yc = yr - yr.mean()
-
-    X_norm = np.linalg.norm(Xc, axis=1)
-    y_norm = np.linalg.norm(yc)
-
-    true_corrs = (Xc @ yc) / (X_norm * y_norm)
-
-    perms = np.array([rng.permutation(y) for _ in range(n_perm)])
-    perms_r = np.apply_along_axis(rankdata, 1, perms)
-    perms_c = perms_r - perms_r.mean(axis=1, keepdims=True)
-    perms_norm = np.linalg.norm(perms_c, axis=1)
-
-    null_corrs = (Xc @ perms_c.T) / (X_norm[:, None] * perms_norm[None, :])
-
-    thresholds = np.percentile(null_corrs, threshold_pct, axis=1)
-    is_language_responsive = true_corrs > thresholds
-
-    p_values = (np.sum(null_corrs >= true_corrs[:, None], axis=1) + 1) / (n_perm + 1)
-
-    return true_corrs, null_corrs, p_values, is_language_responsive, thresholds
 
 
 def load_lang_mask(
