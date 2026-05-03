@@ -1,8 +1,6 @@
 {
   "csv": "/path/to/subject_electrodes.csv",
-  "coord_x_col": "mni_x",
-  "coord_y_col": "mni_y",
-  "coord_z_col": "mni_z",
+  "mni": true,
   "output_dir": "/path/to/output/figures/",
   "plots": [
     {

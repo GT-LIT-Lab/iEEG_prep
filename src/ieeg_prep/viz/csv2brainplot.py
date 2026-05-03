@@ -10,10 +10,8 @@ Config schema
 {
     "csv": "<path to electrode CSV>",
 
-    // coordinate columns (defaults shown)
-    "coord_x_col": "mni_x",
-    "coord_y_col": "mni_y",
-    "coord_z_col": "mni_z",
+    // coordinate space: true → mni_x/y/z, false → x/y/z (default: true)
+    "mni": true,
 
     // optional: column name or list of column names; rows where any == 1 are
     // excluded from all plots (e.g. bad electrodes).
@@ -69,6 +67,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+from ieeg_prep.utils import load_coords
 from ieeg_prep.viz import plot_glass_brain
 
 # Keys that are consumed by the script and must not be forwarded to
@@ -92,16 +91,10 @@ def _sanitise_filename(title: str) -> str:
 def run_from_dict(cfg: dict) -> None:
     """Run the batch plotter from a config dict (same schema as the JSON file)."""
     csv_path = cfg["csv"]
-    x_col = cfg.get("coord_x_col", "mni_x")
-    y_col = cfg.get("coord_y_col", "mni_y")
-    z_col = cfg.get("coord_z_col", "mni_z")
+    mni = bool(cfg.get("mni", True))
     output_dir = cfg.get("output_dir")
 
     df = pd.read_csv(csv_path)
-
-    for col in (x_col, y_col, z_col):
-        if col not in df.columns:
-            raise ValueError(f"Coordinate column '{col}' not found in {csv_path}")
 
     exclude_spec = cfg.get("exclude")
     if exclude_spec is not None:
@@ -115,7 +108,7 @@ def run_from_dict(cfg: dict) -> None:
             exclude_mask |= df[col].to_numpy() == 1
         df = df[~exclude_mask].reset_index(drop=True)
 
-    coords = df[[x_col, y_col, z_col]].to_numpy(dtype=float)
+    coords = load_coords(df, mni=mni)
 
     if output_dir is not None:
         os.makedirs(output_dir, exist_ok=True)

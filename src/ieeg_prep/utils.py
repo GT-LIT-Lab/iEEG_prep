@@ -9,6 +9,29 @@ import numpy as np
 import pandas as pd
 
 
+def load_coords(csv_path_or_df, mni: bool = True) -> np.ndarray:
+    """Load electrode coordinates from a CSV file or DataFrame.
+
+    Parameters
+    ----------
+    csv_path_or_df : str, Path, or pd.DataFrame
+        Path to electrode CSV, or an already-loaded DataFrame.
+    mni : bool
+        If True, read columns ``mni_x``, ``mni_y``, ``mni_z``.
+        If False, read columns ``x``, ``y``, ``z``.
+
+    Returns
+    -------
+    coords : np.ndarray, shape (n_rows, 3)
+    """
+    cols = ["mni_x", "mni_y", "mni_z"] if mni else ["x", "y", "z"]
+    df = csv_path_or_df if isinstance(csv_path_or_df, pd.DataFrame) else pd.read_csv(csv_path_or_df)
+    missing = [c for c in cols if c not in df.columns]
+    if missing:
+        raise ValueError(f"Coordinate columns not found in CSV: {missing}")
+    return df[cols].to_numpy(dtype=float)
+
+
 
 def label_channels(raw: mne.io.Raw) -> mne.io.Raw:
     """Set channel types on an MNE Raw object.

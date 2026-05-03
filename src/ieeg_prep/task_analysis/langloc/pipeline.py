@@ -195,7 +195,7 @@ def _plot_langloc(
 ) -> None:
     from ...viz.csv2brainplot import run_from_dict
 
-    mx_col, my_col, mz_col = mni_coords_cols
+    mni = mni_coords_cols == ("mni_x", "mni_y", "mni_z")
 
     plots = [
         {
@@ -220,9 +220,7 @@ def _plot_langloc(
 
     run_from_dict({
         "csv": str(electrodes_csv_path),
-        "coord_x_col": mx_col,
-        "coord_y_col": my_col,
-        "coord_z_col": mz_col,
+        "mni": mni,
         "exclude": "is_bad",
         "output_dir": str(plot_output_dir),
         "plots": plots,
