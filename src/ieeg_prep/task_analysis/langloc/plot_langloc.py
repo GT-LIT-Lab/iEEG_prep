@@ -1,7 +1,7 @@
 """Language localizer figure generation CLI.
 
-Generates timeseries and mean-amplitude figures for two cross-validated
-langloc blocks, saving PNGs into per-section subdirectories.
+Generates timeseries and mean-amplitude figures for one or more langloc
+blocks, saving PNGs into per-section subdirectories.
 
 The output_dir name should reflect the data type used (e.g.
 ``figures/SUBJECT/langloc_plots_zscore``).
@@ -26,15 +26,26 @@ When plot_all_variants is true, all four combinations of
 (plot_points: on/off) x (run_permutation_test: on/off) are generated
 for the amplitude plots, ignoring the individual flags.
 
+With a single block only self-plots are generated (no cross-validation,
+no superset).  With two or more blocks, cross-validation pairs and a
+pooled superset plot are also generated (superset requires that the
+langloc pipeline was run with superset=True).
+
 Output layout:
     output_dir/
         timeseries/
-            {b1}_data_{b2}_mask.png
-            {b2}_data_{b1}_mask.png
+            {mask_block}_mask/
+                {data_block}/
+                    timeseries.png
         mean_amplitude/
-            mean_{b1}_{b2}_mask_points_noperm.png
-            diff_{b1}_{b2}_mask_points_noperm.png
-            ...
+            {mask_block}_mask/
+                {data_block}/
+                    mean_{variant}.png
+                    diff_{variant}.png
+
+    Self-plots always generated.  Cross-validation pairs and superset
+    added when two or more blocks are provided (superset requires the
+    langloc pipeline to have been run with superset=True).
 
 Example usage:
     run-langloc-plots --config configs/EMOP0004/langloc_plots_config.json
@@ -93,13 +104,28 @@ def _save(fig: plt.Figure, path: Path) -> None:
     print(f"  saved → {path.name}")
 
 
-def _run_timeseries(cfg: dict, data: dict, out_dir: Path) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    b1, b2 = cfg["langloc_blocks"]
-    freq = cfg["frequency"]
+def _collect_pairs(blocks: list[str], has_superset: bool) -> list[tuple[str, str]]:
+    """(data_block, mask_block) pairs to plot.
 
-    for data_block, mask_block in [(b1, b2), (b2, b1)]:
-        fname = f"{data_block}_data_{mask_block}_mask.png"
+    Always includes self-pairs.  Cross-validation pairs and the superset
+    are added only when two or more blocks are present.
+    """
+    pairs = [(b, b) for b in blocks]
+    if len(blocks) >= 2:
+        for i, b1 in enumerate(blocks):
+            for b2 in blocks[i + 1:]:
+                pairs += [(b1, b2), (b2, b1)]
+        if has_superset:
+            pairs.append(("superset", "superset"))
+    return pairs
+
+
+def _run_timeseries(cfg: dict, data: dict, pairs: list[tuple[str, str]], out_dir: Path) -> None:
+    freq = cfg["frequency"]
+    for data_block, mask_block in pairs:
+        sub = out_dir / f"{mask_block}_mask" / data_block
+        sub.mkdir(parents=True, exist_ok=True)
+        fname = "timeseries.png"
         plot_sent_nw_timeseries(
             data["tensors"][data_block],
             data["conds"][data_block],
@@ -107,23 +133,22 @@ def _run_timeseries(cfg: dict, data: dict, out_dir: Path) -> None:
             word_onsets=data["wordstarts"][data_block],
             lang_mask=data["masks"][mask_block],
             title=f"{data_block} data | {mask_block} mask",
-            output_path=str(out_dir / fname),
+            output_path=str(sub / fname),
         )
-        print(f"  saved → {fname}")
+        print(f"  saved → {mask_block}_mask/{data_block}/{fname}")
 
 
-def _run_mean_amplitude(cfg: dict, data: dict, out_dir: Path) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    b1, b2 = cfg["langloc_blocks"]
+def _run_mean_amplitude(cfg: dict, data: dict, pairs: list[tuple[str, str]], out_dir: Path) -> None:
     variants = _variants(cfg)
     n_perm = cfg.get("n_permutations", 5000)
     seed = cfg.get("perm_seed", 42)
 
-    for data_block, mask_block in [(b1, b2), (b2, b1)]:
+    for data_block, mask_block in pairs:
         tensor = data["tensors"][data_block]
         mask = data["masks"][mask_block]
         title = f"{data_block} data | {mask_block} mask"
-        stem = f"{data_block}_{mask_block}_mask"
+        sub = out_dir / f"{mask_block}_mask" / data_block
+        sub.mkdir(parents=True, exist_ok=True)
 
         for pp, rp in variants:
             suf = _vsuffix(pp, rp)
@@ -137,11 +162,11 @@ def _run_mean_amplitude(cfg: dict, data: dict, out_dir: Path) -> None:
             )
             _save(
                 plot_sent_nw_mean_amplitude(tensor, mask, **kwargs),
-                out_dir / f"mean_{stem}_{suf}.png",
+                sub / f"mean_{suf}.png",
             )
             _save(
                 plot_sent_nw_diff_amplitude(tensor, mask, **kwargs),
-                out_dir / f"diff_{stem}_{suf}.png",
+                sub / f"diff_{suf}.png",
             )
 
 
@@ -177,7 +202,7 @@ def main() -> int:
             print(f"Error: {key} not found: {cfg[key]}", file=sys.stderr)
             return 1
 
-    b1, b2 = cfg["langloc_blocks"]
+    blocks = cfg["langloc_blocks"]
 
     print("Loading envelope data...")
     env = mne.io.read_raw_fif(cfg["envelope_path"], preload=True, verbose=False)
@@ -185,34 +210,52 @@ def main() -> int:
 
     events = np.load(cfg["events_path"])
 
-    print(f"Loading blocks: {b1}, {b2}...")
-    block1 = load_block(cfg["blocks_info_path"], b1, events)
-    block2 = load_block(cfg["blocks_info_path"], b2, events)
-    trial_info1, _ = get_trial_word_boundaries_from_block(block1)
-    trial_info2, _ = get_trial_word_boundaries_from_block(block2)
+    data: dict[str, dict] = {"tensors": {}, "conds": {}, "wordstarts": {}, "masks": {}}
 
-    print("Building trial tensors...")
-    t1, c1, ws1 = build_trial_tensor(trial_info1, env_data, DEFAULT_EVENT_CODES)
-    t2, c2, ws2 = build_trial_tensor(trial_info2, env_data, DEFAULT_EVENT_CODES)
+    print(f"Loading blocks: {', '.join(blocks)}...")
+    for b in blocks:
+        block = load_block(cfg["blocks_info_path"], b, events)
+        trial_info, _ = get_trial_word_boundaries_from_block(block)
+        tensor, conds, ws = build_trial_tensor(trial_info, env_data, DEFAULT_EVENT_CODES)
+        data["tensors"][b] = tensor
+        data["conds"][b] = conds
+        data["wordstarts"][b] = ws
 
     print("Loading language masks...")
-    mask1, _ = load_lang_mask(cfg["langloc_results_path"], b1)
-    mask2, _ = load_lang_mask(cfg["langloc_results_path"], b2)
+    for b in blocks:
+        mask, _ = load_lang_mask(cfg["langloc_results_path"], b)
+        data["masks"][b] = mask
 
-    data = {
-        "tensors":    {b1: t1,  b2: t2},
-        "conds":      {b1: c1,  b2: c2},
-        "wordstarts": {b1: ws1, b2: ws2},
-        "masks":      {b1: mask1, b2: mask2},
-    }
+    has_superset = False
+    if len(blocks) >= 2:
+        print("Building superset data...")
+        min_time = min(data["tensors"][b].shape[-1] for b in blocks)
+        sup_tensor = np.concatenate(
+            [data["tensors"][b][..., :min_time] for b in blocks], axis=1
+        )
+        ws_list = [data["wordstarts"][b] for b in blocks]
+        sup_ws = np.mean(ws_list, axis=0) if all(
+            len(ws) == len(ws_list[0]) for ws in ws_list
+        ) else ws_list[0]
+        data["tensors"]["superset"] = sup_tensor
+        data["wordstarts"]["superset"] = sup_ws
+        data["conds"]["superset"] = data["conds"][blocks[0]]
 
+        try:
+            sup_mask, _ = load_lang_mask(cfg["langloc_results_path"], "superset")
+            data["masks"]["superset"] = sup_mask
+            has_superset = True
+        except Exception:
+            print("  Warning: superset mask not found in results, skipping superset plots")
+
+    pairs = _collect_pairs(blocks, has_superset)
     out_root = Path(cfg["output_dir"])
 
     print("\n--- Timeseries plots ---")
-    _run_timeseries(cfg, data, out_root / "timeseries")
+    _run_timeseries(cfg, data, pairs, out_root / "timeseries")
 
     print("\n--- Mean amplitude plots ---")
-    _run_mean_amplitude(cfg, data, out_root / "mean_amplitude")
+    _run_mean_amplitude(cfg, data, pairs, out_root / "mean_amplitude")
 
     print("\nDone.")
     return 0
